@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useApp } from '../AppContext';
 
 export default function AuthModal() {
-  const { authModal, closeAuthModal, openAuthModal, showToast } = useApp();
+  const { authModal, closeAuthModal, openAuthModal, showToast, login } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -11,7 +11,8 @@ export default function AuthModal() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    showToast(isSignup ? `Welcome to Kulan${email ? ', ' + email : ''}! Your account is ready.` : `Welcome back${email ? ', ' + email : ''}!`);
+    login(email);
+    showToast(isSignup ? `Welcome to Kulan, ${email}! You're logged in.` : `Welcome back, ${email}!`);
     setEmail('');
     setPassword('');
     closeAuthModal();

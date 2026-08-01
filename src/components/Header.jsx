@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useApp } from '../AppContext';
 
 export default function Header() {
-  const { openAuthModal, setSearchQuery, setActiveCategory, showToast, scrollToId } = useApp();
+  const { openAuthModal, setSearchQuery, setActiveCategory, showToast, scrollToId, user, logout } = useApp();
   const [value, setValue] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   function runSearch() {
     setActiveCategory(null);
@@ -14,6 +15,12 @@ export default function Header() {
 
   function handleKeyDown(e) {
     if (e.key === 'Enter') runSearch();
+  }
+
+  function handleLogout() {
+    logout();
+    setMenuOpen(false);
+    showToast("You've been logged out");
   }
 
   return (
@@ -38,8 +45,29 @@ export default function Header() {
         <span className="lang" role="button" tabIndex={0} onClick={() => showToast('More languages coming soon')}>
           &#127760; English
         </span>
-        <span className="login" role="button" tabIndex={0} onClick={() => openAuthModal('login')}>Log in</span>
-        <span className="signup" role="button" tabIndex={0} onClick={() => openAuthModal('signup')}>Sign up</span>
+        {user ? (
+          <div className="account-menu">
+            <div
+              className="account-pill"
+              role="button"
+              tabIndex={0}
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              <span className="account-avatar">{user.email.charAt(0).toUpperCase()}</span>
+              <span className="account-email">{user.email}</span>
+            </div>
+            {menuOpen && (
+              <div className="account-dropdown">
+                <span role="button" tabIndex={0} onClick={handleLogout}>Log out</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <span className="login" role="button" tabIndex={0} onClick={() => openAuthModal('login')}>Log in</span>
+            <span className="signup" role="button" tabIndex={0} onClick={() => openAuthModal('signup')}>Sign up</span>
+          </>
+        )}
       </div>
     </header>
   );

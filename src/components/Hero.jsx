@@ -20,7 +20,16 @@ function MiniSquiggle({ flip }) {
 }
 
 export default function Hero() {
-  const { openAuthModal } = useApp();
+  const { openAuthModal, user, scrollToId } = useApp();
+
+  function handleJoinClick(e) {
+    e.preventDefault();
+    if (user) {
+      scrollToId('events-near');
+    } else {
+      openAuthModal('signup');
+    }
+  }
 
   return (
     <section className="hero">
@@ -99,9 +108,9 @@ export default function Hero() {
         <a
           className="btn btn-dark"
           href="#"
-          onClick={(e) => { e.preventDefault(); openAuthModal('signup'); }}
+          onClick={handleJoinClick}
         >
-          Join Kulan
+          {user ? 'Browse events' : 'Join Kulan'}
         </a>
       </div>
     </section>

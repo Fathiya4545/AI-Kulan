@@ -1,7 +1,16 @@
 import { useApp } from '../AppContext';
 
 export default function JoinBanner() {
-  const { openAuthModal } = useApp();
+  const { openAuthModal, user, showToast } = useApp();
+
+  function handleClick(e) {
+    e.preventDefault();
+    if (user) {
+      showToast(`You're already signed in as ${user.email}`);
+    } else {
+      openAuthModal('signup');
+    }
+  }
 
   return (
     <div className="join-banner">
@@ -33,9 +42,9 @@ export default function JoinBanner() {
       <a
         className="btn btn-dark"
         href="#"
-        onClick={(e) => { e.preventDefault(); openAuthModal('signup'); }}
+        onClick={handleClick}
       >
-        Sign up for free
+        {user ? "You're in!" : 'Sign up for free'}
       </a>
     </div>
   );
