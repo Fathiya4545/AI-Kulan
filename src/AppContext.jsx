@@ -1,13 +1,24 @@
-import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 const AppCtx = createContext(null);
+const STORAGE_KEY = 'kulan_user';
 
 export function AppProvider({ children }) {
   const [authModal, setAuthModal] = useState(null); // 'signup' | 'login' | null
   const [toastMsg, setToastMsg] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState(null);
+  const [user, setUser] = useState(null); // { email } | null
   const toastTimer = useRef(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) setUser(JSON.parse(saved));
+    } catch {
+      // ignore malformed/unavailable storage
+    }
+  }, []);
 
   const showToast = useCallback((msg) => {
     setToastMsg(msg);
@@ -17,6 +28,25 @@ export function AppProvider({ children }) {
 
   const openAuthModal = useCallback((mode) => setAuthModal(mode), []);
   const closeAuthModal = useCallback(() => setAuthModal(null), []);
+
+  const login = useCallback((email) => {
+    const account = { email };
+    setUser(account);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
+    } catch {
+      // storage unavailable — session-only login still works
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    setUser(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const scrollToId = useCallback((id) => {
     const el = document.getElementById(id);
@@ -29,6 +59,7 @@ export function AppProvider({ children }) {
     searchQuery, setSearchQuery,
     activeCategory, setActiveCategory,
     scrollToId,
+    user, login, logout,
   };
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;
