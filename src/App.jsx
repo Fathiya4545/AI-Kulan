@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { AppProvider, useApp } from './AppContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -6,14 +7,16 @@ import EventsSection from './components/EventsSection';
 import JoinBanner from './components/JoinBanner';
 import Categories from './components/Categories';
 import PopularCities from './components/PopularCities';
+import ApiProducts from './components/ApiProducts';
 import HowItWorks from './components/HowItWorks';
 import Friendships from './components/Friendships';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import Toast from './components/Toast';
+import ItemDetail from './pages/ItemDetail';
 import { events, onlineEvents } from './data/events';
 
-function AppInner() {
+function Home() {
   const { searchQuery, activeCategory } = useApp();
 
   const filteredEvents = useMemo(() => {
@@ -55,6 +58,7 @@ function AppInner() {
       <JoinBanner />
       <Categories />
       <PopularCities />
+      <ApiProducts />
       <HowItWorks />
       <Friendships />
       <Footer />
@@ -67,7 +71,10 @@ function AppInner() {
 export default function App() {
   return (
     <AppProvider>
-      <AppInner />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/items/:id" element={<ItemDetail />} />
+      </Routes>
     </AppProvider>
   );
 }
