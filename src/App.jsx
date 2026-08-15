@@ -1,73 +1,50 @@
-import { useMemo } from 'react';
-import { AppProvider, useApp } from './AppContext';
+import { Routes, Route, Link } from 'react-router-dom';
+import { AppProvider } from './AppContext';
 import Header from './components/Header';
-import Hero from './components/Hero';
-import EventsSection from './components/EventsSection';
-import JoinBanner from './components/JoinBanner';
-import Categories from './components/Categories';
-import PopularCities from './components/PopularCities';
-import HowItWorks from './components/HowItWorks';
-import Friendships from './components/Friendships';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import Toast from './components/Toast';
-import { events, onlineEvents } from './data/events';
+import Home from './pages/Home';
+import EventDetail from './pages/EventDetail';
+import CreateEvent from './pages/CreateEvent';
+import EditEvent from './pages/EditEvent';
+import MyEvents from './pages/MyEvents';
+import Organizing from './pages/Organizing';
+import ItemDetail from './pages/ItemDetail';
 
-function AppInner() {
-  const { searchQuery, activeCategory } = useApp();
-
-  const filteredEvents = useMemo(() => {
-    let list = events;
-    if (activeCategory) {
-      list = list.filter((e) => e.category === activeCategory);
-    }
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (e) => e.title.toLowerCase().includes(q) || e.group.toLowerCase().includes(q)
-      );
-    }
-    return list;
-  }, [searchQuery, activeCategory]);
-
-  const eventsTitle = activeCategory
-    ? <>Events in <span className="loc-edit">{activeCategory}</span></>
-    : <>Events near <span className="loc-edit">Minneapolis, MN &#9998;</span></>;
-
+function NotFound() {
   return (
-    <>
-      <Header />
-      <Hero />
-      <EventsSection
-        id="events-near"
-        title={eventsTitle}
-        items={filteredEvents}
-        showFreeTag
-        gridClass=""
-      />
-      <EventsSection
-        id="online-events"
-        title="Upcoming online events"
-        items={onlineEvents}
-        gridClass="grid-3"
-        allowSeeAll={false}
-      />
-      <JoinBanner />
-      <Categories />
-      <PopularCities />
-      <HowItWorks />
-      <Friendships />
-      <Footer />
-      <AuthModal />
-      <Toast />
-    </>
+    <div className="page">
+      <h1 className="page-title">Page not found</h1>
+      <p className="page-sub">
+        That link doesn't go anywhere. <Link className="inline-link" to="/">Back to events</Link>.
+      </p>
+    </div>
   );
 }
 
 export default function App() {
   return (
     <AppProvider>
-      <AppInner />
+      <Header />
+
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/events/new" element={<CreateEvent />} />
+          <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/events/:id/edit" element={<EditEvent />} />
+          <Route path="/my-events" element={<MyEvents />} />
+          <Route path="/organizing" element={<Organizing />} />
+          {/* Kept from last week's fetch + routing assignment. */}
+          <Route path="/items/:id" element={<ItemDetail />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+
+      <Footer />
+      <AuthModal />
+      <Toast />
     </AppProvider>
   );
 }
