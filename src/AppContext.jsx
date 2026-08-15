@@ -123,6 +123,7 @@ export function AppProvider({ children }) {
     toastMsg,
     showToast,
     scrollToId,
+    user, login, logout,
   };
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;
