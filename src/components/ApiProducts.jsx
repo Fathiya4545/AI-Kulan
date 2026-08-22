@@ -1,60 +1,55 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import useItemsStore from '../store/useItemsStore';
+import ProductCard from './ProductCard';
 
-// Step 1 of the assignment: fetch a list from a real public API (DummyJSON)
-// inside a single useEffect, and track loading / error / data as state.
 export default function ApiProducts() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Each value is read with its own selector. No props are passed in, and none
+  // are passed down — ProductCard subscribes to the store itself.
+  const items = useItemsStore((s) => s.items);
+  const status = useItemsStore((s) => s.status);
+  const error = useItemsStore((s) => s.error);
+  const favoriteCount = useItemsStore((s) => s.favorites.length);
+  const loadItems = useItemsStore((s) => s.loadItems);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    fetch('https://dummyjson.com/products?limit=8')
-      .then((res) => {
-        if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        if (!cancelled) setProducts(data.products);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err.message);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    // avoid setting state on an unmounted component
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    // Only fetch on the first mount. Reading status through getState instead of
+    // a selector keeps it out of the dependency list, so a later status change
+    // doesn't retrigger the effect.
+    if (useItemsStore.getState().status === 'idle') {
+      loadItems();
+    }
+  }, [loadItems]);
 
   return (
     <section className="section" id="live-products">
       <div className="section-head">
         <h2>Trending finds (live from DummyJSON)</h2>
+        <div className="head-actions">
+          {favoriteCount > 0 && (
+            <span className="fav-count">
+              {favoriteCount} saved
+            </span>
+          )}
+          <button
+            type="button"
+            className="see-all as-button"
+            onClick={loadItems}
+            disabled={status === 'loading'}
+          >
+            {status === 'loading' ? 'Loading…' : 'Reload'}
+          </button>
+        </div>
       </div>
 
-      {loading && <p className="empty-state">Loading products…</p>}
-      {error && <p className="empty-state">Couldn't load products: {error}</p>}
+      {status === 'loading' && <p className="empty-state">Loading products…</p>}
+      {status === 'error' && (
+        <p className="empty-state">Couldn't load products: {error}</p>
+      )}
 
-      {!loading && !error && (
+      {status === 'success' && (
         <div className="grid">
-          {products.map((p) => (
-            <Link className="card product-card" to={`/items/${p.id}`} key={p.id}>
-              <div className="thumb">
-                <img src={p.thumbnail} alt={p.title} />
-              </div>
-              <div className="body">
-                <div className="title">{p.title}</div>
-                <div className="meta">${p.price} · {p.category}</div>
-              </div>
-            </Link>
+          {items.map((p) => (
+            <ProductCard key={p.id} id={p.id} />
           ))}
         </div>
       )}
